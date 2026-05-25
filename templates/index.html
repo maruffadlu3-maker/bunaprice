@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buna Price - Jimma Coffee Prices</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f0e8;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            background-color: #4a2c0a;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .price-box {
+            background-color: #fff;
+            border: 2px solid #4a2c0a;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .price-box h2 {
+            color: #4a2c0a;
+            font-size: 18px;
+        }
+        .price-box .price {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        .price-box .unit {
+            font-size: 16px;
+            color: #777;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        th {
+            background-color: #4a2c0a;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover {
+            background-color: #f9f4ec;
+        }
+        .report-form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .report-form h3 {
+            color: #4a2c0a;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4a2c0a;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #6b3f14;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>☕ Buna Price</h1>
+        <p>Real-time Jimma Coffee Prices for Farmers</p>
+    </div>
+
+    {% if latest %}
+    <div class="price-box">
+        <h2>Today's Jimma Coffee Price</h2>
+        <div class="price">{{ latest[1] | int }} ETB</div>
+        <div class="unit">per Feresula (17kg) — {{ latest[0] }}</div>
+    </div>
+    {% else %}
+    <div class="price-box">
+        <h2>No price data yet</h2>
+        <p>Run the scraper to fetch today's price</p>
+    </div>
+    {% endif %}
+
+    <h3 style="color:#4a2c0a;">📈 Price History</h3>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Price (ETB/Feresula)</th>
+        </tr>
+        {% for row in prices %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] | int }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <div class="report-form">
+        <h3>📋 Report a Middleman Price</h3>
+        <p>What price did a collector offer you today? Help other farmers know.</p>
+        <form action="/report" method="POST">
+            <input type="text" name="phone" placeholder="Your phone number" required />
+            <input type="text" name="kebele" placeholder="Your Kebele name" required />
+            <input type="number" name="offered_price" placeholder="Price offered by middleman (ETB)" required />
+            <button type="submit">Submit Report</button>
+        </form>
+    </div>
+
+</body>
+</html>
