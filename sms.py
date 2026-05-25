@@ -34,13 +34,18 @@ def send_price_alert():
         return
     
     price, date = row
-    message = f"Buna Price Update: Jimma coffee today is {price} ETB per Feresula (Date: {date}). - BunaPrice"
+    message = f"Buna Price: Jimma coffee today is {int(price)} ETB/Feresula ({date}). - BunaPrice"
     
-    # Put YOUR real phone number here with country code
-    # Ethiopia code is +251
-    # Example: +251912345678
-    your_number = "+251966880861"
+    # Add farmer numbers here
+    farmers = [
+        "+251966880861",  # add more numbers below
+        "+251948385444",
+        "+251938612036",
+        "+251917223102",
+        "+251722030705",
+        
+        
+    ]
     
-    send_sms(your_number, message)
-
-send_price_alert()
+    for number in farmers:
+        send_sms(number, message)
