@@ -53,3 +53,9 @@ def report():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+    @app.route("/run-daily-job")
+def run_daily_job():
+    import subprocess
+    subprocess.Popen(["python", "daily_job.py"])
+    return "Daily job started!", 200
