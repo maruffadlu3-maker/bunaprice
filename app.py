@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect
 import sqlite3
 from datetime import datetime
+import subprocess
 
 app = Flask(__name__)
 
@@ -31,7 +32,6 @@ def report():
     phone = request.form.get("phone")
     offered_price = request.form.get("offered_price")
     kebele = request.form.get("kebele")
-    
     conn = sqlite3.connect("bunaprice.db")
     cursor = conn.cursor()
     cursor.execute("""
@@ -51,11 +51,10 @@ def report():
     conn.close()
     return redirect("/")
 
-if __name__ == "__main__":
-    app.run(debug=True)
-
-    @app.route("/run-daily-job")
+@app.route("/run-daily-job")
 def run_daily_job():
-    import subprocess
     subprocess.Popen(["python", "daily_job.py"])
     return "Daily job started!", 200
+
+if __name__ == "__main__":
+    app.run(debug=True)
