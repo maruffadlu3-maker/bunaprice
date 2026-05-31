@@ -5,27 +5,66 @@ import subprocess
 
 app = Flask(__name__)
 
-def get_prices():
+def get_all_prices_today():
     conn = sqlite3.connect("bunaprice.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT date, price_etb FROM prices ORDER BY id DESC LIMIT 30")
+    cursor.execute("""
+        SELECT code, price_etb, volume
+        FROM prices
+        WHERE date = (SELECT MAX(date) FROM prices)
+        ORDER BY price_etb DESC
+    """)
     rows = cursor.fetchall()
     conn.close()
     return rows
 
-def get_latest_price():
+def get_price_history(code):
     conn = sqlite3.connect("bunaprice.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT date, price_etb FROM prices ORDER BY id DESC LIMIT 1")
+    cursor.execute("""
+        SELECT date, price_etb FROM prices
+        WHERE code = ?
+        ORDER BY date DESC LIMIT 30
+    """, (code,))
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+def get_latest_date():
+    conn = sqlite3.connect("bunaprice.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT MAX(date) FROM prices")
     row = cursor.fetchone()
     conn.close()
-    return row
+    return row[0] if row else None
+
+COFFEE_NAMES = {
+    "LU": "Limu Unwashed",
+    "LW": "Limu Washed",
+    "RW": "Robusta Washed",
+    "WW": "Wellega Washed",
+    "WH": "Washed Harar",
+    "GM": "Gimbi",
+    "SB": "Sidama Buno",
+}
+
+def get_coffee_name(code):
+    prefix = code[:2]
+    grade = code[-1]
+    name = COFFEE_NAMES.get(prefix, code)
+    return f"{name} — Grade {grade}"
 
 @app.route("/")
 def home():
-    latest = get_latest_price()
-    prices = get_prices()
-    return render_template("index.html", latest=latest, prices=prices)
+    today_prices = get_all_prices_today()
+    latest_date = get_latest_date()
+    jimma_history = get_price_history("LUBPAA2")
+    enriched = [(code, get_coffee_name(code), price, volume) for code, price, volume in today_prices]
+    return render_template("index.html",
+        today_prices=enriched,
+        latest_date=latest_date,
+        jimma_history=jimma_history
+    )
 
 @app.route("/report", methods=["POST"])
 def report():
@@ -34,15 +73,6 @@ def report():
     kebele = request.form.get("kebele")
     conn = sqlite3.connect("bunaprice.db")
     cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS reports (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            phone TEXT,
-            offered_price REAL,
-            kebele TEXT,
-            date TEXT
-        )
-    """)
     cursor.execute("""
         INSERT INTO reports (phone, offered_price, kebele, date)
         VALUES (?, ?, ?, ?)

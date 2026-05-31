@@ -3,91 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buna Price - Jimma Coffee Prices</title>
+    <title>Buna Price - ECX Coffee Prices</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: Arial, sans-serif; background: #f5ede0; padding: 16px; }
-        .header { background: #4a2c0a; padding: 1.5rem 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
-        .logo { width: 52px; height: 52px; background: #7a4a1a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
-        .header-text h1 { font-size: 22px; font-weight: 600; color: #f5e6d0; }
-        .header-text p { font-size: 13px; color: #c4936a; margin-top: 2px; }
-        .price-card { background: #fff9f0; border: 1px solid #e8c99a; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
-        .price-label { font-size: 12px; color: #8a5a2a; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
-        .price-value { font-size: 52px; font-weight: bold; color: #4a2c0a; line-height: 1; }
-        .price-unit { font-size: 13px; color: #a07040; margin-top: 6px; }
-        .price-date { font-size: 12px; color: #b08050; margin-top: 4px; }
-        .section-title { font-size: 15px; font-weight: 600; color: #4a2c0a; margin-bottom: 0.75rem; }
-        .history-card { background: white; border: 1px solid #e0d0b0; border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem; }
-        .history-row { display: flex; justify-content: space-between; padding: 10px 1.25rem; border-bottom: 1px solid #f0e0c0; }
-        .history-row:last-child { border-bottom: none; }
-        .history-row:first-child { background: #fdf5eb; font-weight: 600; }
-        .row-date { font-size: 13px; color: #666; }
-        .row-price { font-size: 14px; font-weight: 600; color: #4a2c0a; }
-        .report-card { background: white; border: 1px solid #e0d0b0; border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; }
-        .report-card p { font-size: 13px; color: #666; margin-bottom: 1rem; line-height: 1.6; }
+        .header { background: #4a2c0a; padding: 1.25rem 1.5rem; border-radius: 12px; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 1rem; }
+        .logo { width: 48px; height: 48px; background: #7a4a1a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+        .h-title { font-size: 20px; font-weight: 600; color: #f5e6d0; }
+        .h-sub { font-size: 12px; color: #c4936a; margin-top: 2px; }
+        .date-badge { background: #f5ede0; color: #4a2c0a; font-size: 12px; padding: 4px 12px; border-radius: 20px; margin-bottom: 1.25rem; display: inline-block; font-weight: 600; }
+        .card { background: white; border: 1px solid #e0d0b0; border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem; }
+        .card-title { font-size: 14px; font-weight: 600; color: #4a2c0a; margin-bottom: 1rem; }
+        .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #888; margin: 1rem 0 .5rem; padding: .25rem 0; border-bottom: 1px solid #f0e0c0; }
+        .price-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f9f0e0; }
+        .price-row:last-child { border-bottom: none; }
+        .pr-name { font-size: 13px; color: #333; }
+        .pr-code { font-size: 11px; color: #aaa; margin-top: 2px; }
+        .pr-right { text-align: right; }
+        .pr-price { font-size: 14px; font-weight: 600; color: #4a2c0a; }
+        .pr-vol { font-size: 11px; color: #aaa; margin-top: 2px; }
+        .hist-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0e0c0; }
+        .hist-row:last-child { border-bottom: none; }
+        .hist-date { font-size: 13px; color: #666; }
+        .hist-price { font-size: 13px; font-weight: 600; color: #4a2c0a; }
         .field { margin-bottom: 10px; }
         .field label { font-size: 12px; color: #888; display: block; margin-bottom: 4px; }
         .field input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-        .submit-btn { width: 100%; padding: 12px; background: #4a2c0a; color: #f5e6d0; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; margin-top: 4px; }
+        .submit-btn { width: 100%; padding: 12px; background: #4a2c0a; color: #f5e6d0; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; }
         .submit-btn:hover { background: #6b3f14; }
-        .no-price { text-align: center; padding: 2rem; color: #888; }
-        .footer { text-align: center; font-size: 12px; color: #aaa; padding: 1rem 0; }
+        .footer { text-align: center; font-size: 11px; color: #aaa; padding: .75rem 0 0; }
+        .no-data { text-align: center; padding: 2rem; color: #888; }
+        .washed { border-left: 3px solid #2e7d32; padding-left: 8px; }
+        .unwashed { border-left: 3px solid #7a4a1a; padding-left: 8px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="logo">☕</div>
-        <div class="header-text">
-            <h1>Buna Price</h1>
-            <p>Real-time Jimma coffee prices for farmers</p>
-        </div>
+<div class="header">
+    <div class="logo">☕</div>
+    <div>
+        <div class="h-title">Buna Price</div>
+        <div class="h-sub">Real-time ECX coffee prices for farmers</div>
     </div>
+</div>
 
-    {% if latest %}
-    <div class="price-card">
-        <div class="price-label">Today's Jimma coffee price</div>
-        <div class="price-value">{{ "{:,.0f}".format(latest[1]) }}</div>
-        <div class="price-unit">ETB per Feresula (17kg)</div>
-        <div class="price-date">{{ latest[0] }}</div>
-    </div>
-    {% else %}
-    <div class="price-card">
-        <div class="no-price">No price yet today. Check back after market opens.</div>
+{% if latest_date %}
+<div class="date-badge">📅 {{ latest_date }}</div>
+{% endif %}
+
+{% if today_prices %}
+<div class="card">
+    <div class="card-title">☕ Today's ECX Coffee Prices</div>
+
+    <div class="section-label">🟢 Washed Coffees</div>
+    {% for code, name, price, volume in today_prices %}
+    {% if 'Washed' in name and 'Unwashed' not in name %}
+    <div class="price-row">
+        <div>
+            <div class="pr-name washed">{{ name }}</div>
+            <div class="pr-code">{{ code }}</div>
+        </div>
+        <div class="pr-right">
+            <div class="pr-price">{{ "{:,.0f}".format(price) }} ETB</div>
+            <div class="pr-vol">Vol: {{ "{:,.0f}".format(volume) }} kg</div>
+        </div>
     </div>
     {% endif %}
+    {% endfor %}
 
-    <div class="section-title">📈 Price history</div>
-    <div class="history-card">
-        {% for row in prices %}
-        <div class="history-row">
-            <span class="row-date">{{ row[0] }}</span>
-            <span class="row-price">{{ "{:,.0f}".format(row[1]) }} ETB</span>
+    <div class="section-label">🟤 Unwashed / Natural Coffees</div>
+    {% for code, name, price, volume in today_prices %}
+    {% if 'Unwashed' in name %}
+    <div class="price-row">
+        <div>
+            <div class="pr-name unwashed">{{ name }}</div>
+            <div class="pr-code">{{ code }}</div>
         </div>
-        {% endfor %}
+        <div class="pr-right">
+            <div class="pr-price">{{ "{:,.0f}".format(price) }} ETB</div>
+            <div class="pr-vol">Vol: {{ "{:,.0f}".format(volume) }} kg</div>
+        </div>
     </div>
+    {% endif %}
+    {% endfor %}
 
-    <div class="section-title">📋 Report a middleman price</div>
-    <div class="report-card">
-        <p>What price did a collector offer you today? Help other farmers know the real market value.</p>
-        <form action="/report" method="POST">
-            <div class="field">
-                <label>Your phone number</label>
-                <input type="text" name="phone" placeholder="+251 9XX XXX XXX" required />
-            </div>
-            <div class="field">
-                <label>Your Kebele</label>
-                <input type="text" name="kebele" placeholder="e.g. Jimma Geneti" required />
-            </div>
-            <div class="field">
-                <label>Price offered by middleman (ETB)</label>
-                <input type="number" name="offered_price" placeholder="e.g. 9500" required />
-            </div>
-            <button type="submit" class="submit-btn">Submit report</button>
-        </form>
+    <div class="section-label">☕ Other Coffees</div>
+    {% for code, name, price, volume in today_prices %}
+    {% if 'Washed' not in name and 'Unwashed' not in name %}
+    <div class="price-row">
+        <div>
+            <div class="pr-name">{{ name }}</div>
+            <div class="pr-code">{{ code }}</div>
+        </div>
+        <div class="pr-right">
+            <div class="pr-price">{{ "{:,.0f}".format(price) }} ETB</div>
+            <div class="pr-vol">Vol: {{ "{:,.0f}".format(volume) }} kg</div>
+        </div>
     </div>
+    {% endif %}
+    {% endfor %}
 
-    <div class="footer">Buna Price — Built by Maruf Fadlu.</div>
+</div>
+
+{% if jimma_history %}
+<div class="card">
+    <div class="card-title">📈 Limu Unwashed Grade 2 — Price Trend</div>
+    <div style="position:relative;width:100%;height:200px">
+        <canvas id="priceChart"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">📋 Price History — Limu Unwashed Grade 2</div>
+    {% for row in jimma_history %}
+    <div class="hist-row">
+        <span class="hist-date">{{ row[0] }}</span>
+        <span class="hist-price">{{ "{:,.0f}".format(row[1]) }} ETB</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="card">
+    <div class="no-data">No price data yet. Market opens Monday to Friday.</div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-title">🚩 Report a middleman price</div>
+    <p style="font-size:13px;color:#666;margin-bottom:1rem;line-height:1.6">What price did a collector offer you today? Help other farmers know the real market value.</p>
+    <form action="/report" method="POST">
+        <div class="field"><label>Your phone number</label><input type="text" name="phone" placeholder="+251 9XX XXX XXX" required /></div>
+        <div class="field"><label>Your Kebele</label><input type="text" name="kebele" placeholder="e.g. Jimma Geneti" required /></div>
+        <div class="field"><label>Price offered by middleman (ETB)</label><input type="number" name="offered_price" placeholder="e.g. 9500" required /></div>
+        <button type="submit" class="submit-btn">Submit report</button>
+    </form>
+</div>
+
+<div class="footer">Buna Price — Built by Maruf Fadlu.</div>
+
+{% if jimma_history %}
+<script>
+    const labels = {{ jimma_history | map(attribute=0) | list | tojson }}.reverse();
+    const data = {{ jimma_history | map(attribute=1) | list | tojson }}.reverse();
+    new Chart(document.getElementById('priceChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'ETB/Feresula',
+                data: data,
+                borderColor: '#7a4a1a',
+                backgroundColor: 'rgba(122,74,26,0.08)',
+                borderWidth: 2,
+                pointRadius: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { font: { size: 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 8 }, grid: { display: false } },
+                y: { ticks: { font: { size: 10 }, callback: v => 'ETB ' + v.toLocaleString() }, grid: { color: 'rgba(0,0,0,0.04)' } }
+            }
+        }
+    });
+</script>
+{% endif %}
 
 </body>
 </html>

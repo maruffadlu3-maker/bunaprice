@@ -4,19 +4,36 @@ from datetime import date
 import sqlite3
 import re
 
-def save_price(price, grade):
+COFFEE_NAMES = {
+    "LU": "Limu Unwashed",
+    "LW": "Limu Washed",
+    "RW": "Robusta Washed",
+    "WW": "Wellega Washed",
+    "WH": "Washed Harar",
+    "GM": "Gimbi",
+    "SB": "Sidama Buno",
+    "RU": "Robusta Unwashed",
+    "GU": "Gimbi Unwashed",
+}
+
+def get_coffee_name(code):
+    prefix = code[:2]
+    grade = code[-1]
+    name = COFFEE_NAMES.get(prefix, code)
+    return f"{name} Grade {grade}"
+
+def save_price(code, price, volume):
     conn = sqlite3.connect("bunaprice.db")
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO prices (date, price_etb)
-        VALUES (?, ?)
-    """, (str(date.today()), price))
+        INSERT INTO prices (date, code, price_etb, volume)
+        VALUES (?, ?, ?, ?)
+    """, (str(date.today()), code, price, volume))
     conn.commit()
     conn.close()
-    print(f"✅ Saved: {grade} = {price} ETB on {date.today()}")
 
 def scrape_price():
-    print("Fetching today's Jimma coffee price from ECX...")
+    print("Fetching today's coffee prices from ECX...")
 
     url = "https://www.ecx.com.et/Pages/MarketDataPage.aspx"
     headers = {
@@ -28,17 +45,25 @@ def scrape_price():
         soup = BeautifulSoup(response.text, "html.parser")
         text = soup.get_text()
 
-        # Find all LWJM prices (Limu Washed Jimma)
-        matches = re.findall(r'(LWJM\w*)\s+([\d,]+)\s*:', text)
+        matches = re.findall(r'([A-Z]{2,6}\d)\s+([\d,]+)\s*:\s*([\d,]*)', text)
 
-        if matches:
-            print("\n=== Today's Jimma Coffee Prices ===")
-            for grade, price_str in matches:
+        coffee_codes = ["LU", "LW", "RW", "WW", "WH", "GM", "SB"]
+        found = False
+
+        print("\n=== Today's ECX Coffee Prices ===")
+        for code, price_str, volume_str in matches:
+            prefix = code[:2]
+            if prefix in coffee_codes:
                 price = float(price_str.replace(",", ""))
-                print(f"  {grade}: {price} ETB/Feresula")
-                save_price(price, grade)
-        else:
-            print("No Jimma prices found today. Market may be closed.")
+                volume = float(volume_str.replace(",", "")) if volume_str else 0
+                if price > 1000 and volume > 0:
+                    name = get_coffee_name(code)
+                    print(f"  {code} ({name}): {price:,.0f} ETB | Volume: {volume:,.0f}")
+                    save_price(code, price, volume)
+                    found = True
+
+        if not found:
+            print("No coffee prices found today. Market may be closed.")
 
     except Exception as e:
         print(f"Error: {e}")
