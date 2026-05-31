@@ -40,4 +40,3 @@ def send_price_alert():
     for number in farmers:
         send_sms(number, message)
 
-send_price_alert()
