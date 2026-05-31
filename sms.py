@@ -1,15 +1,15 @@
-from twilio.rest import Client
+import africastalking
 from dotenv import load_dotenv
 import os
 import sqlite3
 
 load_dotenv()
 
-account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-twilio_number = os.getenv("TWILIO_PHONE_NUMBER")
+username = os.getenv("AT_USERNAME")
+api_key = os.getenv("AT_API_KEY")
 
-client = Client(account_sid, auth_token)
+africastalking.initialize(username, api_key)
+sms = africastalking.SMS
 
 def get_latest_price():
     conn = sqlite3.connect("bunaprice.db")
@@ -20,12 +20,8 @@ def get_latest_price():
     return row
 
 def send_sms(to_number, message):
-    msg = client.messages.create(
-        body=message,
-        from_=twilio_number,
-        to=to_number
-    )
-    print(f"✅ SMS sent! ID: {msg.sid}")
+    response = sms.send(message, [to_number])
+    print(f"✅ SMS sent to {to_number}! Response: {response}")
 
 def send_price_alert():
     row = get_latest_price()
@@ -36,16 +32,12 @@ def send_price_alert():
     price, date = row
     message = f"Buna Price: Jimma coffee today is {int(price)} ETB/Feresula ({date}). - BunaPrice"
     
-    # Add farmer numbers here
     farmers = [
-        "+251966880861",  # add more numbers below
-        "+251948385444",
-        "+251938612036",
-        "+251917223102",
+        "+251966880861",
         "+251722030705",
-        
-        
     ]
     
     for number in farmers:
         send_sms(number, message)
+
+send_price_alert()
